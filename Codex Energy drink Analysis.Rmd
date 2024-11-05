@@ -1,0 +1,254 @@
+---
+title: "Codex Energy Drink"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.path = "figures/", fig.ext = "png")  # Save all plots to 'figures/' folder
+```
+
+```{r}
+setwd("C:/Users/Mideh/Desktop")
+dim_cities <- read.csv("dim_cities.csv")
+dim_repondents <- read.csv("dim_repondents.csv")
+fact_survey_responses <- read.csv("fact_survey_responses.csv")
+
+```
+
+
+
+#### Visiualizing the data
+
+```{r}
+head(dim_cities)
+```
+```{r}
+head(fact_survey_responses, 7)
+```
+```{r}
+head(dim_repondents)
+```
+
+
+```{r}
+# loadining necesaary libraies
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+```
+
+
+
+```{r}
+# joining all the data set to get derive insights
+Joined <- dim_repondents %>%
+  inner_join(fact_survey_responses) %>%
+  inner_join(dim_cities)
+```
+#### Gender that prefer Energy drink more
+```{r}
+# count of who prefer energy drink more
+#grouping by gender and consume_frequency to analyze preference
+Pref <- Joined %>%
+group_by(Gender, Consume_frequency) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+#visualizing the preference
+ggplot(Pref, aes(x = "Consume_frequency", y = count, fill = Gender)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Preference of Energy drink", x= "Consume_frequency", y = "count") +
+  theme_minimal()
+```
+#### Age group that prefers energy drink more 
+
+```{r}
+Age_pref <- Joined %>%
+  group_by(Age, Consume_frequency) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+#visualizing the Age preference
+ggplot(Age_pref, aes(x = "Consume_frequency", y = count, fill = Age)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Age Preference of Energy drink", x= "Consume_frequency", y = "Age_count") +
+  theme_minimal()
+```
+
+#### Preferred Market Channel by youth
+```{r}
+#filtering the ages between 15-30
+Youth_marketing <- Joined %>%
+  filter(Age >= 15 & Age <= 30) %>%
+  select(Marketing_channels)
+
+#type of market channel preferred by youth 
+Market_channel_count <- Youth_marketing %>%
+  group_by(Marketing_channels) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+#visualizing the type of market channel preferred
+ggplot(Market_channel_count, aes(x = "Age", y = count, fill = Marketing_channels)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Market channel that reaches the most youth", x= "Market_channel", y = "Age_count") +
+  theme_minimal()
+```
+
+```{r}
+#checking fore the most preferred ingredient energy drinks
+Preferred_ingridients <- Joined %>%
+  group_by(Ingredients_expected) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+#visualizing the preferred_ingredients 
+ggplot(Preferred_ingridients, aes(x = "", y = count, fill = Ingredients_expected)) +
+  geom_col() +
+  coord_polar(theta = "y") +
+  geom_label(aes(label = paste0(Ingredients_expected, "\n", count)), 
+             position = position_stack(vjust = 0.5)) +
+  labs(
+    title = "Pie chart of the preferred ingredients by respondents",
+    x = "",
+    y = ""
+  ) +
+  theme_void()
+
+```
+#### Prefrered Ingridients
+```{r}
+# Packaging Preference 
+Packaging_Pref <- Joined %>%
+  group_by(Packaging_preference) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+# Visualizing the packaging_preference uisng a bar chart
+ggplot(Packaging_Pref, aes(x = "Packaging_preference", y = count, fill = Packaging_preference)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Most preferred packaging ", x= "Packaging_preference", y = "count") +
+  theme_minimal()
+```
+#### Current market leaders
+```{r}
+Market_leaders <- Joined %>%
+  group_by(Current_brands) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+#visualizing the current market leaders with a pie chart
+ggplot(Market_leaders, aes(x = "", y = count, fill = Current_brands)) +
+  geom_col() +
+  coord_polar(theta = "y") +
+  geom_label(aes(label = paste0( count)), 
+             position = position_stack(vjust = 0.5)) +
+  labs(
+    title = "Pie chart showing the current market leaders by respondents",
+    x = "",
+    y = ""
+  ) +
+  theme_void()
+```
+#### Reasons for choosing brands
+```{r}
+Reasons <- Joined %>%
+  group_by(Reasons_for_choosing_brands) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+#visualizing the output of the reasons
+ggplot(Reasons, aes(x = "Reasons_for_choosing_brands", y = count, fill =Reasons_for_choosing_brands )) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Reasons why the brands are being chosen by respondents ", x= "reasons", y = "count") +
+  theme_minimal()
+```
+#### Most effective market channels
+```{r}
+#marketing channels to reach more customers
+M_C <- Joined %>%
+  group_by(Marketing_channels) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+# visualizing 
+ggplot(M_C, aes(x = Marketing_channels, y = count, fill = Marketing_channels )) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Most effective marketing channels ", x= "Marketing_channels", y = "count") +
+  theme_minimal()
+```
+
+####
+```{r}
+# checking if the market channels have been effective 
+Adult_marketing <- Joined %>%
+  filter(Age >= 31 & Age <= 65) %>%
+  select(Marketing_channels)
+
+#type of market channel preferred by Adult
+Market_channel_count2 <- Adult_marketing %>%
+  group_by(Marketing_channels) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+#visualizing
+ggplot(Market_channel_count2, aes(x = Marketing_channels, y = count, fill = Marketing_channels)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Market channel that reaches Adults", x= "Market_channel", y = "count") +
+  theme_minimal()
+```
+#### Brands Perception
+```{r}
+Brand_p <- Joined %>%
+  group_by(Brand_perception) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+  # visualizing brand_perception using bar chart
+ggplot(Brand_p, aes(x= Brand_perception, y = count, fill = Brand_perception)) +
+  geom_bar(stat = "identity", position = "dodge") + labs(title = "Respondents view on brand", x = "Brand_Perception", y= "count")
+  
+```
+#### Cities to focus on
+```{r}
+Cities <- Joined %>%
+  group_by(City) %>%
+  summarise(count = n()) %>%
+  arrange((count))
+#visualizing cities with bar chart
+ggplot(Cities, aes(x = City, y = count, fill = City)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Cities", x = "City", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### Respondents Prefrered Purchase Outlets
+```{r}
+#where respondents prefer to purchase Energy drinks
+Purchased_pref <- Joined %>%
+  group_by(Purchase_location) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+# visualizing purchased_pref
+ggplot(Purchased_pref, aes(x = Purchase_location, y = count, fill = Purchase_location)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "preferred location for getting energy drinks", x = "Purchase_location", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+```
+#### Typical Consumption patterns
+```{r}
+#Typical consumption situations
+Consumption_situation <- Joined %>%
+  group_by(Typical_consumption_situations) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+#visualizing
+ggplot(Consumption_situation, aes(x =Typical_consumption_situations , y = count, fill = Typical_consumption_situations)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Typical consumption situations of respondents", x = "Typical_consumption_situations", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+#### Factors influencing purchase decisions 
+```{r}
+# Example of selecting relevant columns for analysis
+Influencing_factors <- Joined %>%
+  select(Price_range, Limited_edition_packaging)
+  # Summary of price range and packaging by purchase decision
+
+
+ggplot(Influencing_factors, aes(x = Price_range, fill = Limited_edition_packaging)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Purchase Decision by Price Range", x = "Price Range", y = "Count")
+```
